@@ -12,6 +12,9 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      textcolor: {
+        DEFAULT: "#918EA0",
+      },
     },
   },
   plugins: [],
