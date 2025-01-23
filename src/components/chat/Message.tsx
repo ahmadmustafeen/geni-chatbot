@@ -27,7 +27,7 @@ const Message: React.FC<MessageProps> = ({message,time,sender = "James Johnson"}
           <div className="text-xs opacity-60 font-medium mb-1 block">
           {sender}, {time}
           </div>
-          <div className="p-2 bg-[#eff4fa] text-gray-500 rounded-md">
+          <div className="p-2 bg-[#eff4fa] text-gray-500 rounded-md break-words">
           {message}
           </div>
         </div>
