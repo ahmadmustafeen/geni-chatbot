@@ -2,7 +2,7 @@
 
 import Message from "@/components/chat/Message";
 import Message2 from "@/components/chat/Message2";
-import { BASE_URL, ENDPOINT_CHAT } from "@/constants";
+import { BASE_URL, ENDPOINTS } from "@/constants";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -111,7 +111,7 @@ const ChatWidget: React.FC = () => {
         payload.sessionId = sessionId;
       }
 
-      const response = await fetch(`${BASE_URL}${ENDPOINT_CHAT}`, {
+      const response = await fetch(`${BASE_URL}${ENDPOINTS.chat}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
