@@ -172,7 +172,7 @@ const ChatWidget: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen "  style={{ backgroundColor: theme.theme.header.backgroundColor }}>
       {/* Fixed Top Section */}
       <div
         className="p-3  shadow-md sticky top-0 z-10"
