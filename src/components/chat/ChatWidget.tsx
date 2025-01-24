@@ -1,8 +1,8 @@
 "use client";
 
-import Message from "@/components/chat/Message";
-import Message2 from "@/components/chat/Message2";
-import { BASE_URL, ENDPOINTS } from "@/constants";
+import Message from "./Message";
+import Message2 from "./Message2";
+// import { BASE_URL, ENDPOINTS } from "@/constants";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -46,17 +46,50 @@ interface Message {
 }
 
 const ChatWidget: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      sender: "AI",
-      text: "Hey there, I am Geni, your AI assistant.How can I help you today?",
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    },
-  ]);
+    const [messages, setMessages] = useState<Message[]>([
+        {
+          id: "1",
+          sender: "AI",
+          text: "Hey there, I am Geni, your AI assistant. How can I help you today?",
+          timestamp: "10:00",
+        },
+        {
+          id: "2",
+          sender: "User",
+          text: "Can you help me write a SQL query?",
+          timestamp: "10:01",
+        },
+        {
+          id: "3",
+          sender: "AI",
+          text: "Of course! What kind of data are you trying to retrieve?",
+          timestamp: "10:01",
+        },
+        {
+          id: "4",
+          sender: "User",
+          text: "I need to find all customers who made purchases last month",
+          timestamp: "10:02",
+        },
+        {
+          id: "5",
+          sender: "AI",
+          text: "I can help you with that. Here's a query to get all customers with purchases from last month:\n\nSELECT c.customer_name, o.order_date, o.total_amount\nFROM customers c\nJOIN orders o ON c.customer_id = o.customer_id\nWHERE o.order_date >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH);",
+          timestamp: "10:02",
+        },
+        {
+          id: "6",
+          sender: "User",
+          text: "Thanks! That's exactly what I needed",
+          timestamp: "10:03",
+        },
+        {
+          id: "7",
+          sender: "AI",
+          text: "You're welcome! Let me know if you need help with anything else.",
+          timestamp: "10:03",
+        }
+      ]);
 
   const [inputValue, setInputValue] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -72,107 +105,107 @@ const ChatWidget: React.FC = () => {
   }, [messages]);
 
   const handleSend = async () => {
-    if (!inputValue.trim() || isProcessing) return;
+    // if (!inputValue.trim() || isProcessing) return;
 
-    setIsProcessing(true);
+    // setIsProcessing(true);
 
-    const userMessage: Message = {
-      id: String(messages.length + 1),
-      sender: "User",
-      text: inputValue,
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
+    // const userMessage: Message = {
+    //   id: String(messages.length + 1),
+    //   sender: "User",
+    //   text: inputValue,
+    //   timestamp: new Date().toLocaleTimeString([], {
+    //     hour: "2-digit",
+    //     minute: "2-digit",
+    //   }),
+    // };
 
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-    setInputValue("");
+    // setMessages((prevMessages) => [...prevMessages, userMessage]);
+    // setInputValue("");
 
-    const typingIndicator: Message = {
-      id: String(messages.length + 2),
-      sender: "AI",
-      text: "Geni is typing...",
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
+    // const typingIndicator: Message = {
+    //   id: String(messages.length + 2),
+    //   sender: "AI",
+    //   text: "Geni is typing...",
+    //   timestamp: new Date().toLocaleTimeString([], {
+    //     hour: "2-digit",
+    //     minute: "2-digit",
+    //   }),
+    // };
 
-    setMessages((prevMessages) => [...prevMessages, typingIndicator]);
+    // setMessages((prevMessages) => [...prevMessages, typingIndicator]);
 
-    try {
-      const payload: Record<string, any> = {
-        website_id: "67700998406ecfde2d6cb66d",
-        message: userMessage.text,
-      };
+    // try {
+    //   const payload: Record<string, any> = {
+    //     website_id: "67700998406ecfde2d6cb66d",
+    //     message: userMessage.text,
+    //   };
 
-      if (sessionId) {
-        payload.sessionId = sessionId;
-      }
+    //   if (sessionId) {
+    //     payload.sessionId = sessionId;
+    //   }
 
-      const response = await fetch(`${BASE_URL}${ENDPOINTS.chat}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+    //   const response = await fetch(`${BASE_URL}${ENDPOINTS.chat}`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(payload),
+    //   });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+    //   if (!response.ok) {
+    //     throw new Error(`HTTP error! status: ${response.status}`);
+    //   }
 
-      const data = await response.json();
+    //   const data = await response.json();
 
-      if (data.sessionId) {
-        setSessionId(data.sessionId);
-      }
+    //   if (data.sessionId) {
+    //     setSessionId(data.sessionId);
+    //   }
 
-      setMessages((prevMessages) =>
-        prevMessages.filter((message) => message.id !== typingIndicator.id)
-      );
+    //   setMessages((prevMessages) =>
+    //     prevMessages.filter((message) => message.id !== typingIndicator.id)
+    //   );
 
-      if (data.response) {
-        const aiMessage: Message = {
-          id: String(messages.length + 3),
-          sender: "AI",
-          text: data.response,
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        };
+    //   if (data.response) {
+    //     const aiMessage: Message = {
+    //       id: String(messages.length + 3),
+    //       sender: "AI",
+    //       text: data.response,
+    //       timestamp: new Date().toLocaleTimeString([], {
+    //         hour: "2-digit",
+    //         minute: "2-digit",
+    //       }),
+    //     };
 
-        setMessages((prevMessages) => [...prevMessages, aiMessage]);
-      } else {
-        throw new Error("API response is empty or invalid");
-      }
-    } catch (error) {
-      console.error("Error:", error);
+    //     setMessages((prevMessages) => [...prevMessages, aiMessage]);
+    //   } else {
+    //     throw new Error("API response is empty or invalid");
+    //   }
+    // } catch (error) {
+    //   console.error("Error:", error);
 
-      setMessages((prevMessages) =>
-        prevMessages.filter((message) => message.id !== typingIndicator.id)
-      );
+    //   setMessages((prevMessages) =>
+    //     prevMessages.filter((message) => message.id !== typingIndicator.id)
+    //   );
 
-      const errorMessage: Message = {
-        id: String(messages.length + 3),
-        sender: "AI",
-        text: "Sorry, there was an error processing your message.",
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
+    //   const errorMessage: Message = {
+    //     id: String(messages.length + 3),
+    //     sender: "AI",
+    //     text: "Sorry, there was an error processing your message.",
+    //     timestamp: new Date().toLocaleTimeString([], {
+    //       hour: "2-digit",
+    //       minute: "2-digit",
+    //     }),
+    //   };
 
-      setMessages((prevMessages) => [...prevMessages, errorMessage]);
-    }
+    //   setMessages((prevMessages) => [...prevMessages, errorMessage]);
+    // }
 
-    setIsProcessing(false);
+    // setIsProcessing(false);
   };
 
   return (
-    <div className="flex flex-col h-screen "  style={{ backgroundColor: theme.theme.header.backgroundColor }}>
+    <div className="flex flex-col h-screen " style={{ backgroundColor: theme.theme.header.backgroundColor }}>
       {/* Fixed Top Section */}
       <div
         className="p-3  shadow-md sticky top-0 z-10"
@@ -191,9 +224,9 @@ const ChatWidget: React.FC = () => {
                 src={theme.theme.avatar}
                 style={{ color: "transparent" }}
               />
-              <span className="flex items-center font-medium bg-[#00ceb6] text-white text-xs rounded-full p-0 h-2 w-2 absolute bottom-1 end-0" />
+              <span className="flex items-center font-medium text-white text-xs rounded-full p-0 h-2 w-2 absolute bottom-1 end-0" style={{backgroundColor:theme.theme.header.statusColor}}/>
             </div>
-            <div>
+            <div style={{color:theme.theme.header.textColor}}>
               <h5 className="text-base sm:mb-1">{theme.theme.title}</h5>
               <div className="text-sm text-ld opacity-90 line-clamp-1">
                 online
@@ -249,6 +282,7 @@ const ChatWidget: React.FC = () => {
                 style={{ backgroundColor: theme.theme.input.backgroundColor }}
                 type="text"
                 value={inputValue}
+                disabled={true}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Type your message..."
               />
