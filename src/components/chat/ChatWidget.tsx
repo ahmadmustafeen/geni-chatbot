@@ -2,8 +2,10 @@
 
 import Message from "@/components/chat/Message";
 import Message2 from "@/components/chat/Message2";
+import { BASE_URL, ENDPOINT_CHAT } from "@/constants";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+
 
 const theme = {
   theme: {
@@ -109,7 +111,7 @@ const ChatWidget: React.FC = () => {
         payload.sessionId = sessionId;
       }
 
-      const response = await fetch("http://localhost:4000/chat/chat", {
+      const response = await fetch(`${BASE_URL}${ENDPOINT_CHAT}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
