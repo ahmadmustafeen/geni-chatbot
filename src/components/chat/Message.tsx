@@ -19,8 +19,8 @@ const Message: React.FC<MessageProps> = ({
   avatar="/imgs/user-5.jpg"
 }) => {
   return (
-    <div className="flex gap-3 mb-8">
-      <div className="flex gap-3">
+    <div className="flex gap-3 mb-8 ">
+      <div className="flex gap-3 max-w-[80%]">
         <div className="shrink-0 sm:min-w-12 min-w-9">
           <Image
             alt="user"
@@ -38,7 +38,7 @@ const Message: React.FC<MessageProps> = ({
             {sender}, {time}
           </div>
           <div
-            className="p-2 rounded-md "
+            className="p-2 rounded-md ml-auto "
             style={{
               wordBreak: "break-word",
               hyphens: "auto",
