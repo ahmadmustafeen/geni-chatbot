@@ -6,7 +6,6 @@ import { BASE_URL, ENDPOINTS } from "@/constants";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-
 const theme = {
   theme: {
     backgroundColor: "#ffffff",
@@ -45,7 +44,7 @@ interface Message {
   timestamp: string;
 }
 
-const ChatWidget: React.FC = () => {
+const ChatWidget = ({ id, theme }: { id: string; theme: any }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -103,7 +102,7 @@ const ChatWidget: React.FC = () => {
 
     try {
       const payload: Record<string, any> = {
-        website_id: "67700998406ecfde2d6cb66d",
+        chatbotId: id,
         message: userMessage.text,
       };
 
@@ -111,7 +110,7 @@ const ChatWidget: React.FC = () => {
         payload.sessionId = sessionId;
       }
 
-      const response = await fetch(`${BASE_URL}${ENDPOINTS.chat}`, {
+      const response = await fetch(`${BASE_URL}${ENDPOINTS.chat}/stream-chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -119,34 +118,77 @@ const ChatWidget: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
+      if (!response.ok || !response.body) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let content = "";
+      let buffer = "";
 
-      if (data.sessionId) {
-        setSessionId(data.sessionId);
-      }
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        const id = messages.length;
 
-      setMessages((prevMessages) =>
-        prevMessages.filter((message) => message.id !== typingIndicator.id)
-      );
+        buffer += decoder.decode(value, { stream: true });
 
-      if (data.response) {
-        const aiMessage: Message = {
-          id: String(messages.length + 3),
-          sender: "AI",
-          text: data.response,
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        };
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || ""; // Keep the last incomplete line
 
-        setMessages((prevMessages) => [...prevMessages, aiMessage]);
-      } else {
-        throw new Error("API response is empty or invalid");
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6).trim();
+            if (data === "[DONE]") {
+              console.log("Stream complete");
+              return;
+            }
+            try {
+              const json = JSON.parse(data);
+              content += json.content;
+              console.log(json.content); // Process streamed content
+              setMessages((prevMessages) =>
+                prevMessages.map((item) =>
+                  item.id !== id.toString()
+                    ? item
+                    : {
+                        ...item,
+                        id: id.toString(),
+                        sender: "AI",
+                        text: item.text + json.content,
+                      }
+                )
+              );
+            } catch (error) {
+              console.error("Error parsing JSON", error);
+            }
+          }
+        }
+
+        // if (data.sessionId) {
+        //   setSessionId(data.sessionId);
+        // }
+
+        setMessages((prevMessages) =>
+          prevMessages.filter((message) => message.id !== typingIndicator.id)
+        );
+
+        // if (data.response) {
+        //   const aiMessage: Message = {
+        //     id: String(messages.length + 3),
+        //     sender: "AI",
+        //     text: data.response,
+        //     timestamp: new Date().toLocaleTimeString([], {
+        //       hour: "2-digit",
+        //       minute: "2-digit",
+        //     }),
+        //   };
+
+        //   setMessages((prevMessages) => [...prevMessages, aiMessage]);
+        // } else {
+        //   throw new Error("API response is empty or invalid");
+        // }
       }
     } catch (error) {
       console.error("Error:", error);
@@ -172,11 +214,14 @@ const ChatWidget: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen "  style={{ backgroundColor: theme.theme.backgroundColor }}>
+    <div
+      className="flex flex-col h-screen "
+      style={{ backgroundColor: theme?.root?.background }}
+    >
       {/* Fixed Top Section */}
       <div
         className="p-3  shadow-md sticky top-0 z-10"
-        style={{ backgroundColor: theme.theme.header.backgroundColor }}
+        style={{ backgroundColor: theme?.label?.background }}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -188,13 +233,16 @@ const ChatWidget: React.FC = () => {
                 height="48"
                 decoding="async"
                 className="rounded-full sm:h-12 sm:w-12 h-9 w-9"
-                src={theme.theme.avatar}
+                src={theme?.avatar}
                 style={{ color: "transparent" }}
               />
-             <span className="flex items-center font-medium text-white text-xs rounded-full p-0 h-2 w-2 absolute bottom-1 end-0" style={{backgroundColor:theme.theme.header.statusColor}}/>
+              <span
+                className="flex items-center font-medium text-white text-xs rounded-full p-0 h-2 w-2 absolute bottom-1 end-0"
+                style={{ backgroundColor: theme?.label?.statusColor }}
+              />
             </div>
-            <div style={{color:theme.theme.header.textColor}}>
-              <h5 className="text-base sm:mb-1">{theme.theme.title}</h5>
+            <div style={{ color: theme?.label?.text }}>
+              <h5 className="text-base sm:mb-1">{theme?.title || "Active"}</h5>
               <div className="text-sm text-ld opacity-90 line-clamp-1">
                 online
               </div>
@@ -212,17 +260,19 @@ const ChatWidget: React.FC = () => {
                 key={message.id}
                 message={message.text}
                 time={message.timestamp}
-                backgroundColor={theme.theme.bot.backgroundColor}
-                textColor={theme.theme.bot.textColor}
-                avatar={theme.theme.avatar}
+                backgroundColor={theme?.botMessage?.background}
+                textColor={theme?.botMessage?.text}
+                avatar={theme?.avatar || ""}
               />
             ) : (
               <Message2
                 key={message.id}
                 message={message.text}
                 time={message.timestamp}
-                backgroundColor={theme.theme.user.backgroundColor}
-                textColor={theme.theme.user.textColor}
+                backgroundColor={theme?.userMessage?.background}
+                textColor={theme?.userMessage?.text}
+                // backgroundColor={theme.user.backgroundColor}
+                // textColor={theme.user.textColor}
               />
             )
           )}
@@ -232,7 +282,7 @@ const ChatWidget: React.FC = () => {
 
       <div
         className="w-full"
-        style={{ backgroundColor: theme.theme.input.backgroundColor }}
+        style={{ backgroundColor: theme?.message?.background }}
       >
         <hr className="h-px border-0 bg-gray-200 my-0" />
         <form
@@ -246,7 +296,7 @@ const ChatWidget: React.FC = () => {
             <div className="flex border-0 w-full">
               <input
                 className="w-full text-gray-900 border-0 p-3 text-lg focus:outline-none"
-                style={{ backgroundColor: theme.theme.input.backgroundColor }}
+                style={{ backgroundColor: theme?.message?.background }}
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -257,8 +307,8 @@ const ChatWidget: React.FC = () => {
               type="submit"
               className="hover:shadow-md transition-all duration-200 cursor-pointer rounded-full p-2"
               style={{
-                backgroundColor: theme.theme.button.backgroundColor,
-                color: theme.theme.button.textColor,
+                backgroundColor: theme?.submitButton?.background,
+                color: theme?.submitButton?.text,
               }}
               disabled={isProcessing}
             >
