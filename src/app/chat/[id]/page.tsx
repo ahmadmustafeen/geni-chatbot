@@ -89,13 +89,7 @@ const ChatPage = () => {
         </svg>
       </button>
 
-      {isChatVisible && (
-        <div className="bg-black h-screen w-screen bg-opacity-30">
-          <div className="w-96 h-96 absolute right-16 bottom-16 bg-white rounded-xl shadow-lg overflow-hidden">
-            <ChatWidget id={id as string} theme={theme} />
-          </div>
-        </div>
-      )}
+      {isChatVisible && <ChatWidget id={id as string} theme={theme} />}
     </div>
   );
 };
