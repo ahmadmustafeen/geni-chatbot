@@ -140,7 +140,7 @@ const ChatWidget = ({ id, theme }: { id: string; theme: any }) => {
 
   return (
     <div
-      className="flex flex-col h-screen "
+      className="flex flex-col"
       style={{ backgroundColor: theme?.root?.background }}
     >
       {/* Fixed Top Section */}
