@@ -1,42 +1,10 @@
 "use client";
 
-import Message from "@/components/chat/Message";
-import Message2 from "@/components/chat/Message2";
 import { BASE_URL, ENDPOINTS } from "@/constants";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-
-
-const theme = {
-  theme: {
-    backgroundColor: "#ffffff",
-    title: "Geni AI Assistant",
-    avatar: "/imgs/user-5.jpg",
-    bot: {
-      backgroundColor: "#eff4fa",
-      textColor: "#4B5563",
-    },
-    user: {
-      backgroundColor: "#46caeb25",
-      textColor: "#4B5563",
-    },
-    button: {
-      backgroundColor: "#ffffff",
-      textColor: "#808080",
-      hoverBackgroundColor: "#f3f4f6",
-    },
-    header: {
-      backgroundColor: "#ffffff",
-      textColor: "#111827",
-      statusColor: "#00ceb6",
-    },
-    input: {
-      backgroundColor: "#ffffff",
-      textColor: "#111827",
-      placeholderColor: "#6B7280",
-    },
-  },
-};
+import Message from "./Message";
+import { MessageCircle, Send, X } from "lucide-react";
 
 interface Message {
   id: string;
@@ -45,12 +13,69 @@ interface Message {
   timestamp: string;
 }
 
-const ChatWidget: React.FC = () => {
+const defaultTheme = {
+  botMessage: {
+    background: "#eff4fa",
+    text: "#4B5563",
+  },
+  root: {
+    background: "#ffffff",
+  },
+  userMessage: {
+    background: "#46caeb",
+    text: "#4B5563",
+  },
+  submitButton: {
+    background: "#ffffff",
+    text: "#808080",
+    hover: "#f3f4f6",
+  },
+  label: {
+    background: "#ffffff",
+    text: "#111827",
+    statusColor: "#00ceb6",
+  },
+  message: {
+    background: "#ffffff",
+    text: "#111827",
+    placeholder: "#6B7280",
+  },
+};
+
+interface ChatWidgetProps {
+  id: string;
+  theme?: typeof defaultTheme;
+  title?: string;
+}
+
+const ChatWidget = ({
+  id,
+  theme: customTheme,
+  title = "Geni AI Assistant",
+}: ChatWidgetProps) => {
+  // Merge default theme with custom theme
+  const theme = {
+    ...defaultTheme,
+    ...customTheme,
+    botMessage: { ...defaultTheme.botMessage, ...customTheme?.botMessage },
+    root: { ...defaultTheme.root, ...customTheme?.root },
+    userMessage: { ...defaultTheme.userMessage, ...customTheme?.userMessage },
+    submitButton: {
+      ...defaultTheme.submitButton,
+      ...customTheme?.submitButton,
+      icon: "",
+    },
+    avatar: "",
+    label: { ...defaultTheme.label, ...customTheme?.label },
+    message: { ...defaultTheme.message, ...customTheme?.message },
+  };
+
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
       sender: "AI",
-      text: "Hey there, I am Geni, your AI assistant.How can I help you today?",
+      text: "Hey there, I am Geni, your AI assistant. How can I help you today?",
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -68,8 +93,10 @@ const ChatWidget: React.FC = () => {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (isOpen) {
+      scrollToBottom();
+    }
+  }, [messages, isOpen]);
 
   const handleSend = async () => {
     if (!inputValue.trim() || isProcessing) return;
@@ -103,7 +130,7 @@ const ChatWidget: React.FC = () => {
 
     try {
       const payload: Record<string, any> = {
-        website_id: "67700998406ecfde2d6cb66d",
+        chatbotId: id,
         message: userMessage.text,
       };
 
@@ -119,12 +146,11 @@ const ChatWidget: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
+      if (!response.ok || !response.body) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-
       if (data.sessionId) {
         setSessionId(data.sessionId);
       }
@@ -166,115 +192,153 @@ const ChatWidget: React.FC = () => {
       };
 
       setMessages((prevMessages) => [...prevMessages, errorMessage]);
+    } finally {
+      setIsProcessing(false);
     }
-
-    setIsProcessing(false);
   };
 
   return (
-    <div className="flex flex-col h-screen "  style={{ backgroundColor: theme.theme.backgroundColor }}>
-      {/* Fixed Top Section */}
-      <div
-        className="p-3  shadow-md sticky top-0 z-10"
-        style={{ backgroundColor: theme.theme.header.backgroundColor }}
+    <div className="fixed bottom-4 right-4 z-50">
+      {/* Chat toggle button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus:outline-none"
+        style={{ backgroundColor: theme.userMessage.background }}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative sm:min-w-12 min-w-9">
-              <Image
-                alt="user"
-                loading="lazy"
-                width="48"
-                height="48"
-                decoding="async"
-                className="rounded-full sm:h-12 sm:w-12 h-9 w-9"
-                src={theme.theme.avatar}
-                style={{ color: "transparent" }}
-              />
-             <span className="flex items-center font-medium text-white text-xs rounded-full p-0 h-2 w-2 absolute bottom-1 end-0" style={{backgroundColor:theme.theme.header.statusColor}}/>
-            </div>
-            <div style={{color:theme.theme.header.textColor}}>
-              <h5 className="text-base sm:mb-1">{theme.theme.title}</h5>
-              <div className="text-sm text-ld opacity-90 line-clamp-1">
-                online
-              </div>
-            </div>
-          </div>
-          <hr className="h-px border-0 bg-gray-200 my-2" />
-        </div>
-      </div>
+        {isOpen ? (
+          <X size={24} color="white" />
+        ) : (
+          <MessageCircle size={24} color="white" />
+        )}
+      </button>
 
-      <div className="flex-grow overflow-y-auto">
-        <div className="w-full p-3">
-          {messages.map((message) =>
-            message.sender === "AI" ? (
-              <Message
-                key={message.id}
-                message={message.text}
-                time={message.timestamp}
-                backgroundColor={theme.theme.bot.backgroundColor}
-                textColor={theme.theme.bot.textColor}
-                avatar={theme.theme.avatar}
-              />
-            ) : (
-              <Message2
-                key={message.id}
-                message={message.text}
-                time={message.timestamp}
-                backgroundColor={theme.theme.user.backgroundColor}
-                textColor={theme.theme.user.textColor}
-              />
-            )
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      <div
-        className="w-full"
-        style={{ backgroundColor: theme.theme.input.backgroundColor }}
-      >
-        <hr className="h-px border-0 bg-gray-200 my-0" />
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
+      {/* Chat modal */}
+      {isOpen && (
+        <div
+          className="absolute bottom-20 right-0 w-80 sm:w-96 rounded-lg shadow-xl overflow-hidden flex flex-col"
+          style={{
+            backgroundColor: theme.root.background,
+            maxHeight: "500px",
+            height: "calc(100vh - 100px)",
           }}
-          className="w-full"
         >
-          <div className="flex gap-3 items-center py-4 px-4 shadow-md">
-            <div className="flex border-0 w-full">
-              <input
-                className="w-full text-gray-900 border-0 p-3 text-lg focus:outline-none"
-                style={{ backgroundColor: theme.theme.input.backgroundColor }}
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Type your message..."
-              />
+          {/* Fixed Top Section */}
+          <div
+            className="p-3 shadow-md sticky top-0 z-10"
+            style={{ backgroundColor: theme.label.background }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="relative sm:min-w-12 min-w-9">
+                  <Image
+                    alt="user"
+                    loading="lazy"
+                    width="48"
+                    height="48"
+                    decoding="async"
+                    className="rounded-full sm:h-12 sm:w-12 h-9 w-9"
+                    src={theme?.avatar || "/imgs/user-5.jpg"}
+                    style={{ color: "transparent" }}
+                  />
+                  <span
+                    className="flex items-center font-medium text-white text-xs rounded-full p-0 h-2 w-2 absolute bottom-1 end-0"
+                    style={{ backgroundColor: theme.label.statusColor }}
+                  />
+                </div>
+                <div style={{ color: theme.label.text }}>
+                  <h5 className="text-base sm:mb-1">{title}</h5>
+                  <div className="text-sm text-ld opacity-90 line-clamp-1">
+                    online
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="rounded-full p-1 hover:bg-gray-100 focus:outline-none"
+              >
+                <X size={18} color={theme.label.text} />
+              </button>
             </div>
-            <button
-              type="submit"
-              className="hover:shadow-md transition-all duration-200 cursor-pointer rounded-full p-2"
-              style={{
-                backgroundColor: theme.theme.button.backgroundColor,
-                color: theme.theme.button.textColor,
-              }}
-              disabled={isProcessing}
-            >
-              <Image
-                alt="send"
-                loading="lazy"
-                width="20"
-                height="20"
-                decoding="async"
-                src="/svgs/send.svg"
-                style={{ color: "#808080" }}
-              />
-            </button>
           </div>
-        </form>
-      </div>
+
+          {/* Messages container */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="w-full p-3 flex-1">
+              {messages.map((message, index) => (
+                <Message
+                  key={index}
+                  message={message.text}
+                  time={message.timestamp}
+                  backgroundColor={
+                    message.sender === "AI"
+                      ? theme.botMessage.background
+                      : theme.userMessage.background
+                  }
+                  textColor={
+                    message.sender === "AI"
+                      ? theme.botMessage.text
+                      : theme.userMessage.text
+                  }
+                  avatar={theme.avatar || "/imgs/user-5.jpg"}
+                  sender={message.sender}
+                />
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+
+          {/* Input form */}
+          <div style={{ backgroundColor: theme.message.background }}>
+            <hr className="h-px border-0 bg-gray-200 my-0" />
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSend();
+              }}
+              className="w-full"
+            >
+              <div className="flex gap-3 items-center py-4 px-4 shadow-md">
+                <div className="flex border-0 w-full">
+                  <input
+                    className="w-full text-gray-900 border-0 p-3 text-lg focus:outline-none"
+                    style={{
+                      backgroundColor: theme.message.background,
+                      color: theme.message.text,
+                    }}
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Type your message..."
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="hover:shadow-md transition-all duration-200 cursor-pointer rounded-full p-2"
+                  style={{
+                    backgroundColor: theme.submitButton.background,
+                    color: theme.submitButton.text,
+                  }}
+                  disabled={isProcessing}
+                >
+                  {theme.submitButton?.icon ? (
+                    <Image
+                      alt="send"
+                      loading="lazy"
+                      width="20"
+                      height="20"
+                      decoding="async"
+                      src={theme.submitButton.icon || "/svgs/send.svg"}
+                      style={{ color: theme.submitButton.text }}
+                    />
+                  ) : (
+                    <Send size={20} color={theme.submitButton.text} />
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
