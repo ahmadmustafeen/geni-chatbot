@@ -6,37 +6,6 @@ import { BASE_URL, ENDPOINTS } from "@/constants";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-const theme = {
-  theme: {
-    backgroundColor: "#ffffff",
-    title: "Geni AI Assistant",
-    avatar: "/imgs/user-5.jpg",
-    bot: {
-      backgroundColor: "#eff4fa",
-      textColor: "#4B5563",
-    },
-    user: {
-      backgroundColor: "#46caeb25",
-      textColor: "#4B5563",
-    },
-    button: {
-      backgroundColor: "#ffffff",
-      textColor: "#808080",
-      hoverBackgroundColor: "#f3f4f6",
-    },
-    header: {
-      backgroundColor: "#ffffff",
-      textColor: "#111827",
-      statusColor: "#00ceb6",
-    },
-    input: {
-      backgroundColor: "#ffffff",
-      textColor: "#111827",
-      placeholderColor: "#6B7280",
-    },
-  },
-};
-
 interface Message {
   id: string;
   sender: "User" | "AI";
@@ -45,6 +14,7 @@ interface Message {
 }
 
 const ChatWidget = ({ id, theme }: { id: string; theme: any }) => {
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -110,7 +80,7 @@ const ChatWidget = ({ id, theme }: { id: string; theme: any }) => {
         payload.sessionId = sessionId;
       }
 
-      const response = await fetch(`${BASE_URL}${ENDPOINTS.chat}/stream-chat`, {
+      const response = await fetch(`${BASE_URL}${ENDPOINTS.chat}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,74 +91,29 @@ const ChatWidget = ({ id, theme }: { id: string; theme: any }) => {
       if (!response.ok || !response.body) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      const data = await response.json();
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
+      }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let content = "";
-      let buffer = "";
+      setMessages((prevMessages) =>
+        prevMessages.filter((message) => message.id !== typingIndicator.id)
+      );
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        const id = messages.length;
+      if (data.response) {
+        const aiMessage: Message = {
+          id: String(messages.length + 3),
+          sender: "AI",
+          text: data.response,
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        };
 
-        buffer += decoder.decode(value, { stream: true });
-
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || ""; // Keep the last incomplete line
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6).trim();
-            if (data === "[DONE]") {
-              console.log("Stream complete");
-              return;
-            }
-            try {
-              const json = JSON.parse(data);
-              content += json.content;
-              console.log(json.content); // Process streamed content
-              setMessages((prevMessages) =>
-                prevMessages.map((item) =>
-                  item.id !== id.toString()
-                    ? item
-                    : {
-                        ...item,
-                        id: id.toString(),
-                        sender: "AI",
-                        text: item.text + json.content,
-                      }
-                )
-              );
-            } catch (error) {
-              console.error("Error parsing JSON", error);
-            }
-          }
-        }
-
-        // if (data.sessionId) {
-        //   setSessionId(data.sessionId);
-        // }
-
-        setMessages((prevMessages) =>
-          prevMessages.filter((message) => message.id !== typingIndicator.id)
-        );
-
-        // if (data.response) {
-        //   const aiMessage: Message = {
-        //     id: String(messages.length + 3),
-        //     sender: "AI",
-        //     text: data.response,
-        //     timestamp: new Date().toLocaleTimeString([], {
-        //       hour: "2-digit",
-        //       minute: "2-digit",
-        //     }),
-        //   };
-
-        //   setMessages((prevMessages) => [...prevMessages, aiMessage]);
-        // } else {
-        //   throw new Error("API response is empty or invalid");
-        // }
+        setMessages((prevMessages) => [...prevMessages, aiMessage]);
+      } else {
+        throw new Error("API response is empty or invalid");
       }
     } catch (error) {
       console.error("Error:", error);

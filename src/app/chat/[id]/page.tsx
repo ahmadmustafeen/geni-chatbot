@@ -50,14 +50,13 @@ function App() {
         "Content-Type": "application/json",
       },
     });
-    console.log({ response });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
-    const { theme = {} } = data;
-    console.log({ theme, data });
+
+    const { theme = {} } = data?.chatbot;
     setTheme(theme);
   };
 
