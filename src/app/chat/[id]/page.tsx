@@ -66,7 +66,7 @@ const ChatPage = () => {
   const toggleChat = () => setIsChatVisible((prev) => !prev);
 
   return (
-    <div className="fixed bottom-0 bg-white h-screen w-screen right-0 z-50">
+    <div className="fixed bottom-0 h-screen w-screen right-0 z-50">
       <button
         onClick={toggleChat}
         className="fixed bottom-4 right-4 w-14 h-14 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg hover:bg-blue-600 transition-colors duration-200"
