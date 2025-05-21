@@ -75,7 +75,7 @@ const ChatWidget = ({
     {
       id: "1",
       sender: "AI",
-      text: "Hey there, I am Geni, your AI assistant. How can I help you today?",
+      text: `Hey there, I am ${title}, your AI assistant. How can I help you today?`,
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -198,11 +198,10 @@ const ChatWidget = ({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      {/* Chat toggle button */}
+    <div className="w-screen h-screen fixed !bg-transparent">
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus:outline-none"
+        onClick={() => setIsOpen((open) => !open)}
+        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus:outline-none fixed bottom-5 right-5 z-50"
         style={{ backgroundColor: theme.userMessage.background }}
       >
         {isOpen ? (
@@ -211,11 +210,9 @@ const ChatWidget = ({
           <MessageCircle size={24} color="white" />
         )}
       </button>
-
-      {/* Chat modal */}
       {isOpen && (
         <div
-          className="absolute bottom-20 right-0 w-80 sm:w-96 rounded-lg shadow-xl overflow-hidden flex flex-col"
+          className="absolute bottom-20 right-20 w-80 sm:w-96 rounded-lg shadow-xl overflow-hidden flex flex-col"
           style={{
             backgroundColor: theme.root.background,
             maxHeight: "500px",
