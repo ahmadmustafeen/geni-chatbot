@@ -297,7 +297,7 @@ const ChatWidget = ({
               <div className="flex gap-3 items-center py-4 px-4 shadow-md">
                 <div className="flex border-0 w-full">
                   <input
-                    className="w-full text-gray-900 border-0 p-3 text-lg focus:outline-none"
+                    className="w-full text-sm text-gray-900 border-0 p-3 focus:outline-none"
                     style={{
                       backgroundColor: theme.message.background,
                       color: theme.message.text,

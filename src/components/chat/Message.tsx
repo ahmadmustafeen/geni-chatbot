@@ -46,7 +46,7 @@ const Message: React.FC<MessageProps> = ({
             {isUser ? `${time}, You` : `${sender}, ${time}`}
           </div>
           <div
-            className={`p-3 rounded-md ${isUser ? 'rounded-tr-none' : 'rounded-tl-none'}`}
+            className={`p-3 rounded-md text-sm ${isUser ? 'rounded-tr-none' : 'rounded-tl-none'}`}
             style={{
               wordBreak: "break-word",
               hyphens: "auto",
