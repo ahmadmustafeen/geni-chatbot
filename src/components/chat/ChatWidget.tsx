@@ -47,6 +47,7 @@ interface ChatWidgetProps {
   theme?: typeof defaultTheme;
   title?: string;
   avatar?: string;
+  initialMessage?: string;
 }
 
 const ChatWidget = ({
@@ -54,6 +55,7 @@ const ChatWidget = ({
   avatar,
   theme: customTheme,
   title = "Geni AI Assistant",
+  initialMessage = "",
 }: ChatWidgetProps) => {
   // Merge default theme with custom theme
   const theme = {
@@ -76,14 +78,16 @@ const ChatWidget = ({
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      sender: "AI",
-      text: `Hey there, I am ${title}, your AI assistant. How can I help you today?`,
+      // @ts-ignore
+      sender: title,
+      text: initialMessage,
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
     },
   ]);
+
 
   const [inputValue, setInputValue] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -120,8 +124,9 @@ const ChatWidget = ({
 
     const typingIndicator: Message = {
       id: String(messages.length + 2),
-      sender: "AI",
-      text: "Geni is typing...",
+      // @ts-ignore
+      sender: "typing",
+      text: `${title} is typing...`,
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -164,7 +169,8 @@ const ChatWidget = ({
       if (data.response) {
         const aiMessage: Message = {
           id: String(messages.length + 3),
-          sender: "AI",
+          // @ts-ignore
+          sender: title,
           text: data.response,
           timestamp: new Date().toLocaleTimeString([], {
             hour: "2-digit",
@@ -269,12 +275,12 @@ const ChatWidget = ({
                   message={message.text}
                   time={message.timestamp}
                   backgroundColor={
-                    message.sender === "AI"
+                    message.sender !== "User"
                       ? theme.botMessage.background
                       : theme.userMessage.background
                   }
                   textColor={
-                    message.sender === "AI"
+                    message.sender !== "User"
                       ? theme.botMessage.text
                       : theme.userMessage.text
                   }

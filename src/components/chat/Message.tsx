@@ -4,7 +4,7 @@ import React from "react";
 interface MessageProps {
   message: string;
   time: string;
-  sender: "User" | "AI";
+  sender: "User" | "AI" | string;
   backgroundColor?: string;
   textColor?: string;
   avatar?: string;
