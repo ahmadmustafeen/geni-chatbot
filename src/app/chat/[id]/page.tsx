@@ -37,7 +37,10 @@ const ChatPage = () => {
   const params = useParams();
   const { id } = params;
   const [theme, setTheme] = useState(defaultTheme);
-  const [personality, setPersonality] = useState({name: 'Geni'});
+  const [personality, setPersonality] = useState({
+    name: "Geni",
+    avatar: "/imgs/user-5.jpg",
+  });
 
   useEffect(() => {
     const fetchChatbot = async () => {
@@ -66,7 +69,6 @@ const ChatPage = () => {
     fetchChatbot();
   }, [id]);
 
-
   return (
     <div className="fixed bottom-0 h-screen w-screen right-0 z-50 !bg-transparent">
       {/* <button
@@ -91,7 +93,14 @@ const ChatPage = () => {
         </svg>
       </button> */}
 
-     {theme && personality && <ChatWidget id={id as string} theme={theme} title={personality.name}/>}
+      {theme && personality && (
+        <ChatWidget
+          id={id as string}
+          theme={theme}
+          title={personality.name}
+          avatar={personality.avatar}
+        />
+      )}
     </div>
   );
 };

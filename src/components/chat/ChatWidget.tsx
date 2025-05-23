@@ -46,10 +46,12 @@ interface ChatWidgetProps {
   id: string;
   theme?: typeof defaultTheme;
   title?: string;
+  avatar?: string;
 }
 
 const ChatWidget = ({
   id,
+  avatar,
   theme: customTheme,
   title = "Geni AI Assistant",
 }: ChatWidgetProps) => {
@@ -234,7 +236,7 @@ const ChatWidget = ({
                     height="48"
                     decoding="async"
                     className="rounded-full sm:h-12 sm:w-12 h-9 w-9"
-                    src={theme?.avatar || "/imgs/user-5.jpg"}
+                    src={avatar || "/imgs/user-5.jpg"}
                     style={{ color: "transparent" }}
                   />
                   <span
@@ -276,7 +278,7 @@ const ChatWidget = ({
                       ? theme.botMessage.text
                       : theme.userMessage.text
                   }
-                  avatar={theme.avatar || "/imgs/user-5.jpg"}
+                  avatar={avatar || "/imgs/user-5.jpg"}
                   sender={message.sender}
                 />
               ))}
