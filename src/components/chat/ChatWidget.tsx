@@ -88,7 +88,6 @@ const ChatWidget = ({
     },
   ]);
 
-
   const [inputValue, setInputValue] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -209,7 +208,7 @@ const ChatWidget = ({
     <div className="w-screen h-screen fixed !bg-transparent">
       <button
         onClick={() => setIsOpen((open) => !open)}
-        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus:outline-none fixed bottom-5 right-5 z-50"
+        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg focus:outline-none fixed bottom-5 md:bottom-5 right-1 md:right-5 z-50"
         style={{ backgroundColor: theme.userMessage.background }}
       >
         {isOpen ? (
@@ -220,7 +219,7 @@ const ChatWidget = ({
       </button>
       {isOpen && (
         <div
-          className="absolute bottom-20 right-20 w-80 sm:w-96 rounded-lg shadow-xl overflow-hidden flex flex-col"
+          className="absolute bottom-24 md:bottom-20 right-5 md:right-20 w-80 sm:w-96 rounded-lg shadow-xl overflow-hidden flex flex-col"
           style={{
             backgroundColor: theme.root.background,
             maxHeight: "500px",
