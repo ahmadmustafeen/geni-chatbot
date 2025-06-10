@@ -301,7 +301,7 @@ const ChatWidget = ({
               }}
               className="w-full"
             >
-              <div className="flex gap-3 items-center py-4 px-4 shadow-md">
+              <div className="flex gap-3 items-center py-4 px-4 border">
                 <div className="flex border-0 w-full">
                   <input
                     className="w-full text-sm text-gray-900 border-0 p-3 focus:outline-none"
@@ -338,6 +338,14 @@ const ChatWidget = ({
                     <Send size={20} color={theme.submitButton.text} />
                   )}
                 </button>
+              </div>
+              <div className="text-xs text-gray-500 text-center py-2">
+                Powered by{" "}
+                <span className="font-bold underline">
+                  <a href="https://leadwise.genimatics.com" target="_blank">
+                    Leadwise
+                  </a>
+                </span>
               </div>
             </form>
           </div>
