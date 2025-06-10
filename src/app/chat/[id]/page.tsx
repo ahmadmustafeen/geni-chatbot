@@ -37,6 +37,7 @@ const ChatPage = () => {
   const params = useParams();
   const { id } = params;
   const [theme, setTheme] = useState(defaultTheme);
+  const [hideChatbot, setHideChatbot] = useState(false);
   const [initialMessage, setInitialMessage] = useState<string>('');
   const [isVisible, setIsVisible] = useState(false);
   const [personality, setPersonality] = useState({
@@ -61,23 +62,25 @@ const ChatPage = () => {
 
       const data = await response.json();
 
-      const { chatbot, personality } = data;
+      const { chatbot, personality, hideChatbot } = data;
       const { theme: chatbotTheme = {}, initialMessage } = chatbot;
       setTheme(chatbotTheme);
       setInitialMessage(initialMessage);
       setPersonality(personality);
+      setHideChatbot(hideChatbot);
       
       setTimeout(() => {
         setIsVisible(true);
       }, 100);
     };
 
+
     fetchChatbot();
   }, [id]);
 
   return (
     <div className="fixed bottom-0 h-screen w-screen right-0 z-50 !bg-transparent">
-      {isVisible && theme && personality && (
+      {isVisible && theme && personality && !hideChatbot && (
         <ChatWidget
           id={id as string}
           theme={theme}
