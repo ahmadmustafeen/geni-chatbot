@@ -38,7 +38,7 @@ const ChatPage = () => {
   const { id } = params;
   const [theme, setTheme] = useState(defaultTheme);
   const [hideChatbot, setHideChatbot] = useState(false);
-  const [initialMessage, setInitialMessage] = useState<string>("");
+  const [initialMessage, setInitialMessage] = useState<string>('');
   const [isVisible, setIsVisible] = useState(false);
   const [personality, setPersonality] = useState({
     name: "Geni",
@@ -68,23 +68,18 @@ const ChatPage = () => {
       setInitialMessage(initialMessage);
       setPersonality(personality);
       setHideChatbot(hideChatbot);
-
+      
       setTimeout(() => {
         setIsVisible(true);
       }, 100);
     };
 
+
     fetchChatbot();
   }, [id]);
 
   return (
-    <div
-      className="fixed bottom-0 right-0 z-50"
-      style={{
-        width: "400px", // or whatever your desired chatbot width is
-        height: "600px", // fixed height so iframe doesn't collapse
-      }}
-    >
+    <div className="fixed bottom-0 h-screen w-screen right-0 z-50 !bg-transparent">
       {isVisible && theme && personality && !hideChatbot && (
         <ChatWidget
           id={id as string}
