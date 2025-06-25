@@ -1,10 +1,11 @@
 "use client";
 
-import { BASE_URL, ENDPOINTS } from "@/constants";
+import { BASE_URL, ENDPOINTS, formatDateToYYMMDD } from "@/constants";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Message from "./Message";
 import { MessageCircle, Send, X } from "lucide-react";
+import Calendar from "react-calendar";
 
 interface Message {
   id: string;
@@ -90,6 +91,8 @@ const ChatWidget = ({
 
   const [inputValue, setInputValue] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showDate, setShowDate] = useState<Date[]>([]);
+  const [showTime, setShowTime] = useState<string[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -103,15 +106,16 @@ const ChatWidget = ({
     }
   }, [messages, isOpen]);
 
-  const handleSend = async () => {
-    if (!inputValue.trim() || isProcessing) return;
+  const handleSend = async (message?: string) => {
+    const _tempMessage = message || inputValue;
+    if (!_tempMessage.trim() || isProcessing) return;
 
     setIsProcessing(true);
 
     const userMessage: Message = {
       id: String(messages.length + 1),
       sender: "User",
-      text: inputValue,
+      text: _tempMessage,
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -124,7 +128,7 @@ const ChatWidget = ({
     const typingIndicator: Message = {
       id: String(messages.length + 2),
       // @ts-ignore
-      sender: "typing",
+      sender: title,
       text: `${title} is typing...`,
       timestamp: new Date().toLocaleTimeString([], {
         hour: "2-digit",
@@ -166,18 +170,28 @@ const ChatWidget = ({
       );
 
       if (data.response) {
-        const aiMessage: Message = {
-          id: String(messages.length + 3),
-          // @ts-ignore
-          sender: title,
-          text: data.response,
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        };
+        const res = JSON.parse(data.response);
+        console.log({ res });
 
-        setMessages((prevMessages) => [...prevMessages, aiMessage]);
+        if (res.message) {
+          const aiMessage: Message = {
+            id: String(messages.length + 3),
+            // @ts-ignore
+            sender: title,
+            text: res.message,
+            timestamp: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          };
+          setMessages((prevMessages) => [...prevMessages, aiMessage]);
+        }
+        if (res.date) {
+          setShowDate(res.date.map((date: string) => new Date(date)));
+        }
+        if (res.time) {
+          setShowTime(res.time);
+        }
       } else {
         throw new Error("API response is empty or invalid");
       }
@@ -292,63 +306,127 @@ const ChatWidget = ({
           </div>
 
           {/* Input form */}
-          <div style={{ backgroundColor: theme.message.background }}>
-            <hr className="h-px border-0 bg-gray-200 my-0" />
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSend();
-              }}
-              className="w-full"
-            >
-              <div className="flex gap-3 items-center py-4 px-4 border">
-                <div className="flex border-0 w-full">
-                  <input
-                    className="w-full text-sm text-gray-900 border-0 p-3 focus:outline-none"
-                    style={{
-                      backgroundColor: theme.message.background,
-                      color: theme.message.text,
-                    }}
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Type your message..."
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="hover:shadow-md transition-all duration-200 cursor-pointer rounded-full p-2"
-                  style={{
-                    backgroundColor: theme.submitButton.background,
-                    color: theme.submitButton.text,
+
+          {showDate?.length ? (
+            <div className="text-xs opacity-60 px-4 font-medium mb-1 text-center w-full">
+              <div className="my-2">
+                <p className="font-bold text-base">Date:</p>
+                <p className="text-xs opacity-60">
+                  Click on any date to Continue
+                </p>
+              </div>
+              <div className="flex gap-x-2 w-11/12 mx-auto py-4 justify-center items-center">
+                <Calendar
+                  tileDisabled={({ date }) =>
+                    !showDate.some(
+                      (d) => d.toDateString() === date.toDateString()
+                    )
+                  }
+                  className="rounded-xl border p-3 border-gray-200 bg-white"
+                  tileClassName={({ date }) => {
+                    const isAllowed = showDate.some(
+                      (d) => d.toDateString() === date.toDateString()
+                    );
+                    return isAllowed
+                      ? "bg-green-100 rounded-lg text-black font-semibold hover:bg-green-200"
+                      : "";
                   }}
-                  disabled={isProcessing}
-                >
-                  {theme.submitButton?.icon ? (
-                    <Image
-                      alt="send"
-                      loading="lazy"
-                      width="20"
-                      height="20"
-                      decoding="async"
-                      src={theme.submitButton.icon || "/svgs/send.svg"}
-                      style={{ color: theme.submitButton.text }}
+                  onClickDay={(date) => {
+                    setShowDate([]);
+                    handleSend(formatDateToYYMMDD(date));
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+          {showTime?.length ? (
+            <div className="text-xs opacity-60 text-center pb-4 font-medium mb-1">
+              <div className="my-2">
+                <p className="font-bold text-base">Time:</p>
+                <p className="text-xs opacity-60">
+                  Click on any time to Continue
+                </p>
+              </div>
+
+              <div className="flex gap-x-2 px-2 overflow-x-scroll w-full">
+                {showTime.map((time, index) => (
+                  <div
+                    className={`min-w-fit bg-red-600 text-center text-white px-3 py-2 rounded-full text-xs`}
+                    style={{
+                      backgroundColor: theme.botMessage.background,
+                      color: theme.botMessage.text,
+                    }}
+                    key={index}
+                    onClick={() => {
+                      setShowTime([]);
+                      handleSend(time);
+                    }}
+                  >
+                    <div className="w-full">{time}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {showDate?.length || showTime?.length ? null : (
+            <div style={{ backgroundColor: theme.message.background }}>
+              <hr className="h-px border-0 bg-gray-200 my-0" />
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSend();
+                }}
+                className="w-full"
+              >
+                <div className="flex gap-3 items-center py-4 px-4 border">
+                  <div className="flex border-0 w-full">
+                    <input
+                      className="w-full text-sm text-gray-900 border-0 p-3 focus:outline-none"
+                      style={{
+                        backgroundColor: theme.message.background,
+                        color: theme.message.text,
+                      }}
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder="Type your message..."
                     />
-                  ) : (
-                    <Send size={20} color={theme.submitButton.text} />
-                  )}
-                </button>
-              </div>
-              <div className="text-xs text-gray-500 text-center py-2">
-                Powered by{" "}
-                <span className="font-bold underline">
-                  <a href="https://leadwise.genimatics.com" target="_blank">
-                    Leadwise
-                  </a>
-                </span>
-              </div>
-            </form>
-          </div>
+                  </div>
+                  <button
+                    type="submit"
+                    className="hover:shadow-md transition-all duration-200 cursor-pointer rounded-full p-2"
+                    style={{
+                      backgroundColor: theme.submitButton.background,
+                      color: theme.submitButton.text,
+                    }}
+                    disabled={isProcessing}
+                  >
+                    {theme.submitButton?.icon ? (
+                      <Image
+                        alt="send"
+                        loading="lazy"
+                        width="20"
+                        height="20"
+                        decoding="async"
+                        src={theme.submitButton.icon || "/svgs/send.svg"}
+                        style={{ color: theme.submitButton.text }}
+                      />
+                    ) : (
+                      <Send size={20} color={theme.submitButton.text} />
+                    )}
+                  </button>
+                </div>
+                <div className="text-xs text-gray-500 text-center py-2">
+                  Powered by{" "}
+                  <span className="font-bold underline">
+                    <a href="https://leadwise.genimatics.com" target="_blank">
+                      Leadwise
+                    </a>
+                  </span>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       )}
     </div>
