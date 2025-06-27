@@ -310,13 +310,15 @@ const ChatWidget = ({
           {showDate?.length ? (
             <div className="text-xs opacity-60 px-4 font-medium mb-1 text-center w-full">
               <div className="my-2">
-                <p className="font-bold text-base">Date:</p>
-                <p className="text-xs opacity-60">
-                  Click on any date to Continue
+                <p className="text-base">
+                  Please select a date from the calendar.
                 </p>
               </div>
               <div className="flex gap-x-2 w-11/12 mx-auto py-4 justify-center items-center">
                 <Calendar
+                  showNeighboringMonth={false}
+                  prev2Label={null}
+                  next2Label={null}
                   tileDisabled={({ date }) =>
                     !showDate.some(
                       (d) => d.toDateString() === date.toDateString()
@@ -328,7 +330,7 @@ const ChatWidget = ({
                       (d) => d.toDateString() === date.toDateString()
                     );
                     return isAllowed
-                      ? "bg-green-100 rounded-lg text-black font-semibold hover:bg-green-200"
+                      ? "bg-white !text-sm font-bold !border-2 !border-solid !border-green-200 rounded-lg text-black font-bold"
                       : "";
                   }}
                   onClickDay={(date) => {
@@ -340,15 +342,38 @@ const ChatWidget = ({
             </div>
           ) : null}
           {showTime?.length ? (
-            <div className="text-xs opacity-60 text-center pb-4 font-medium mb-1">
+            <div className="text-xs opacity-60 text-center pb-10 font-medium mb-1">
               <div className="my-2">
-                <p className="font-bold text-base">Time:</p>
-                <p className="text-xs opacity-60">
-                  Click on any time to Continue
+                <p className="text-base mb-6">
+                  Please select a time from the below.
                 </p>
               </div>
 
-              <div className="flex gap-x-2 px-2 overflow-x-scroll w-full">
+              <div className="overflow-x-auto">
+                <div
+                  className="grid grid-rows-2 auto-cols-max gap-2 pb-4 px-2"
+                  style={{ gridAutoFlow: "column" }}
+                >
+                  {showTime.map((time, index) => (
+                    <div
+                      onClick={() => {
+                        setShowTime([]);
+                        handleSend(time);
+                      }}
+                      style={{
+                        backgroundColor: theme.botMessage.background,
+                        color: theme.botMessage.text,
+                      }}
+                      key={index}
+                      className={`cursor-pointer min-w-fit  text-center text-white px-3 py-2 rounded-full text-sm border border-gray-200 hover:!bg-[${theme.botMessage.background}/0.2]`}
+                    >
+                      {time}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* <div className="flex gap-x-2 px-2 overflow-x-scroll w-full">
                 {showTime.map((time, index) => (
                   <div
                     className={`min-w-fit bg-red-600 text-center text-white px-3 py-2 rounded-full text-xs`}
@@ -365,7 +390,7 @@ const ChatWidget = ({
                     <div className="w-full">{time}</div>
                   </div>
                 ))}
-              </div>
+              </div> */}
             </div>
           ) : null}
           {showDate?.length || showTime?.length ? null : (

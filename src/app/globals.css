@@ -21,11 +21,8 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 } */
 
-
-
 @layer base {
   :root {
-
     --background: 0 0% 100%;
 
     --foreground: 0 0% 3.9%;
@@ -74,10 +71,9 @@ body {
 
     --chart-5: 27 87% 67%;
 
-    --radius: 0.5rem
+    --radius: 0.5rem;
   }
   .dark {
-
     --background: 0 0% 3.9%;
 
     --foreground: 0 0% 98%;
@@ -124,11 +120,9 @@ body {
 
     --chart-4: 280 65% 60%;
 
-    --chart-5: 340 75% 55%
+    --chart-5: 340 75% 55%;
   }
 }
-
-
 
 @layer base {
   * {
@@ -141,24 +135,27 @@ body {
 
 .react-calendar {
   width: 100%;
-  background: transparent;
-  font-family: 'Inter', sans-serif;
+  background: white;
+  font-family: "Inter", sans-serif;
 }
 
 .react-calendar__tile {
   transition: all 0.2s;
 }
+.react-calendar__month-view__days {
+  gap: 0.1rem;
+}
 
 .react-calendar__tile--active {
-  background-color: green !important; /* green-400 */
   color: white !important;
+  border-radius: 5px !important;
 }
 
 .react-calendar__tile--now {
   background: #f9ffc8; /* yellow-100 */
   color: #b45309;
 }
-.react-calendar__tile:disabled{
-  background-color: rgba(255,255,255,0.1);
-  color: grey;
+.react-calendar__tile:disabled {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgb(189, 189, 189);
 }
