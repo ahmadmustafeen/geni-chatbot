@@ -1,6 +1,6 @@
 "use client";
 import { BASE_URL, ENDPOINTS } from "@/constants";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import ChatWidget from "@/components/chat/ChatWidget";
 
@@ -35,10 +35,12 @@ const defaultTheme = {
 
 const ChatPage = () => {
   const params = useParams();
+  const searchParams = useSearchParams();
   const { id } = params;
+
   const [theme, setTheme] = useState(defaultTheme);
   const [hideChatbot, setHideChatbot] = useState(false);
-  const [initialMessage, setInitialMessage] = useState<string>('');
+  const [initialMessage, setInitialMessage] = useState<string>("");
   const [isVisible, setIsVisible] = useState(false);
   const [personality, setPersonality] = useState({
     name: "Geni",
@@ -56,6 +58,8 @@ const ChatPage = () => {
         },
       });
 
+      console.log(response);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -68,12 +72,11 @@ const ChatPage = () => {
       setInitialMessage(initialMessage);
       setPersonality(personality);
       setHideChatbot(hideChatbot);
-      
+
       setTimeout(() => {
         setIsVisible(true);
       }, 100);
     };
-
 
     fetchChatbot();
   }, [id]);
@@ -82,6 +85,8 @@ const ChatPage = () => {
     <div className="fixed bottom-0 h-screen w-screen right-0 z-50 !bg-transparent">
       {isVisible && theme && personality && !hideChatbot && (
         <ChatWidget
+          isOpened={!!searchParams.get("opened")}
+          dev={!!searchParams.get("dev")}
           id={id as string}
           theme={theme}
           title={personality.name}

@@ -48,11 +48,15 @@ interface ChatWidgetProps {
   theme?: typeof defaultTheme;
   title?: string;
   avatar?: string;
+  isOpened?: boolean;
+  dev?: boolean;
   initialMessage?: string;
 }
 
 const ChatWidget = ({
   id,
+  isOpened,
+  dev,
   avatar,
   theme: customTheme,
   title = "Geni AI Assistant",
@@ -75,7 +79,7 @@ const ChatWidget = ({
     message: { ...defaultTheme.message, ...customTheme?.message },
   };
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(isOpened || false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -142,6 +146,7 @@ const ChatWidget = ({
       const payload: Record<string, any> = {
         chatbotId: id,
         message: userMessage.text,
+        dev,
       };
 
       if (sessionId) {
